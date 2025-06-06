@@ -1,0 +1,7 @@
+//middlewares sao funções que interceptam requisições HTTP antes ou depois de chegar ao handler
+//principal. no gin são uisados para:
+// Autenticar (Por exemplo verificar tokens JWT)
+// Logging (registrar requisições)
+// Compressão (gzip)
+// Recovery de panics
+
