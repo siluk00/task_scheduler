@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/siluk00/task_scheduler/internal/domain"
 	"github.com/siluk00/task_scheduler/internal/repository"
@@ -28,6 +31,16 @@ func (h *taskHandler) CreateTask(c *gin.Context) {
 		// 400 is the status code for Bad Request
 		c.JSON(400, gin.H{"error": "Invalid task data"})
 		return
+	}
+
+	if err := task.Validate(); err != nil {
+		// 400 is the status code for Bad Request
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	if task.Status == "" {
+		task.Status = domain.TaskStatusPending // Default status if not provided
 	}
 
 	if err := h.repo.Create(c.Request.Context(), &task); err != nil {
@@ -61,4 +74,77 @@ func (h *taskHandler) GetTask(c *gin.Context) {
 	c.JSON(200, task)
 }
 
-//TODO: Other handlers like UpdateTask, ListTasks, DeleteTask, etc.
+func (h *taskHandler) UpdateTask(c *gin.Context) {
+	id := c.Param("id")
+
+	existingTask, err := h.repo.FindById(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to retrieve task"})
+		return
+	}
+
+	if existingTask == nil {
+		c.JSON(404, gin.H{"error": "Task not found"})
+		return
+	}
+
+	var task domain.Task
+	// ShouldBindJSON is used to bind the JSON body of the request to the task struct.
+	if err := c.ShouldBindJSON(&task); err != nil {
+		// 400 is the status code for Bad Request
+		// c.Json is a method to send a JSON response with a specific status code.
+		c.JSON(400, gin.H{"error": "Invalid task data"})
+		return
+	}
+
+	task.ID = id // Ensure the task ID is set to the path parameter ID
+
+	if err := task.Validate(); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	task.CreatedAt = existingTask.CreatedAt // Preserve the original created time
+	task.UpdatedAt = time.Now()             // Preserve the original updated time
+
+	if err := h.repo.Update(c.Request.Context(), &task); err != nil {
+		// 500 is the status code for Internal Server Error
+		c.JSON(500, gin.H{"error": "Failed to update task"})
+		return
+	}
+
+	c.JSON(200, gin.H{"message": "Task updated successfully", "task_id": task.ID})
+}
+
+func (h *taskHandler) DeleteTask(c *gin.Context) {
+	id := c.Param("id")
+	taskToDelete, err := h.repo.FindById(c, id)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err})
+		return
+	}
+
+	if taskToDelete == nil {
+		c.JSON(404, gin.H{"error": "not found"})
+		return
+	}
+
+	//c.Request.Context() is used to get the context of the current request.
+	// The context is used to pass request-scoped values, deadlines, and cancellation signals.
+	// The Request context is sent instead of the context of the handler function because
+	// it allows the repository to access the request context, which may contain information
+	// about the request, such as the request ID, user, etc.
+	if err := h.repo.Delete(c.Request.Context(), id); err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	// C.Status is a method to set the HTTP status code of the response.
+	// http.StatusNoContent is the status code for No Content (204).
+	// It indicates that the request was successful, but there is no content to return.
+	// This is typically used for DELETE requests where no response body is needed.
+	// 204 is the status code for No Content
+	c.Status(http.StatusNoContent)
+}
+
+//TODO: Other handlers like ListTasks, DeleteTask, etc.

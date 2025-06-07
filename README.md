@@ -9,3 +9,5 @@ Monitoring: Métricas e logs detalhados
 
 docker-compose up -d
 go run cmd/api/main.go
+
+O repositório é um cliente redis

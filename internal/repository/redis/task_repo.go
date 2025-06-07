@@ -72,6 +72,9 @@ func (r *TaskRepository) Create(ctx context.Context, task *domain.Task) error {
 	return err
 }
 
+// FindById retrieves a task by its ID from the Redis database.
+// It returns the task if found, or an error if there is a Redis error.
+// If the task is not found, it returns nil without an error.
 func (r *TaskRepository) FindById(ctx context.Context, id string) (*domain.Task, error) {
 	// Get method retrieves the task data from Redis using the task ID.
 	// It returns the task if found, or an error if not found or if there is a Redis error.
