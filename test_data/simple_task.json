@@ -1,0 +1,7 @@
+{
+    "id": "daily-backup",
+    "name": "Backup Diário",
+    "description": "Fazer backup do banco de dados principal",
+    "command": "pg_dump -U postgres mydb > /backups/daily_$(date +%Y%m%d).sql",
+    "status": "pending"
+}

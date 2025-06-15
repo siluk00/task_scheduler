@@ -1,3 +1,9 @@
+// @title Task Scheduler API
+// @version 1.0
+// @deescription API for task scheduling
+// @host localhost:8080
+// @BasePath /
+
 package handlers
 
 import (
@@ -147,4 +153,20 @@ func (h *taskHandler) DeleteTask(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-//TODO: Other handlers like ListTasks, DeleteTask, etc.
+func (h *taskHandler) ListTasks(c *gin.Context) {
+	status := domain.TaskStatus(c.Query("status"))
+
+	tasks, err := h.repo.List(c.Request.Context(), status)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error})
+		return
+	}
+
+	if tasks == nil {
+		tasks = []*domain.Task{}
+	}
+
+	c.JSON(http.StatusOK, tasks)
+}
+
+//TODO: Other handlers like ListTasks
