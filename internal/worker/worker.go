@@ -37,6 +37,7 @@ func NewTaskWorker(cfg *config.AppConfig) (*TaskWorker, error) {
 
 	taskRepo := redisL.NewTaskRepository(rdb)
 
+	//gets a connection and a channel in rabbitmq
 	msgQueue, err := rabbitmq.NewRabbitMQ(cfg.RedisMQURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to rabbitmq: %v", err.Error())
@@ -58,6 +59,13 @@ func (w *TaskWorker) Start(ctx context.Context) error {
 		return fmt.Errorf("failed to setup rabbitmq: %w", err)
 	}
 
+	go func() {
+		if err := w.StartConsumer(ctx); err != nil {
+			log.Printf("Consumer stopped with error: %v", err)
+			w.Stop(ctx)
+		}
+	}()
+
 	for w.running {
 		select {
 		case <-ctx.Done():
@@ -74,6 +82,7 @@ func (w *TaskWorker) Start(ctx context.Context) error {
 }
 
 func (w *TaskWorker) SetupRabbitMQ() error {
+	// declare two exchanges, tasks and direct
 	err := w.msgQueue.DeclareExchange("tasks", "direct")
 	if err != nil {
 		return err
@@ -84,6 +93,7 @@ func (w *TaskWorker) SetupRabbitMQ() error {
 		return nil
 	}
 
+	//binds the tasks_queue to the tasks exchange
 	return w.msgQueue.BindQueue("tasks_queue", "tasks", "tasks.routing.key")
 }
 
@@ -93,7 +103,7 @@ func (w *TaskWorker) proccessTasks(ctx context.Context) error {
 
 	tasks, err := w.taskRepo.FindScheduled(ctx, now, windowEnd)
 	if err != nil {
-		return fmt.Errorf("error finding scheduled tasks: %w", err)
+		return fmt.Errorf("error finding scheduled tasks: %v", err)
 	}
 
 	for _, task := range tasks {
@@ -124,8 +134,15 @@ func (w *TaskWorker) proccessTasks(ctx context.Context) error {
 func (w *TaskWorker) publishTask(task *domain.Task) error {
 	taskData, err := json.Marshal(task)
 	if err != nil {
-		return fmt.Errorf("failed to maarshal task: %w", err)
+		return fmt.Errorf("failed to maarshal task: %v", err)
 	}
 
 	return w.msgQueue.Publish("tasks", "task.routing.key", taskData)
+}
+
+func (w *TaskWorker) Stop(ctx context.Context) {
+	w.running = false
+	if err := w.msgQueue.CLose(); err != nil {
+		log.Printf("Error closing message queue: %v", err)
+	}
 }

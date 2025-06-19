@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/siluk00/task_scheduler/internal/worker"
 	"github.com/siluk00/task_scheduler/pkg/config"
@@ -37,4 +38,13 @@ func main() {
 			sigChan <- syscall.SIGTERM
 		}
 	}()
+
+	<-sigChan
+	log.Println("Shutting down worker...")
+
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownCancel()
+
+	taskWorker.Stop(shutdownCtx)
+	log.Println("Worker stopped gracefully")
 }

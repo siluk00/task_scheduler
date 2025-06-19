@@ -1,6 +1,7 @@
 package api
 
 import (
+	_ "github.com/siluk00/task_scheduler/docs"
 	"github.com/siluk00/task_scheduler/internal/api/handlers"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -11,10 +12,12 @@ import (
 // Cada rota é associada a uma função (handler) que será executada quando a rota for acessada.
 
 func (s *Server) setupRoutes() {
-	//s.router.GET("/health", s.healthCheckHandler)
+
 	//s.router.GET("/metrics", s.metricsHandler)
 
 	taskHandler := handlers.NewTaskHandler(s.taskRepo)
+
+	s.router.GET("/health", taskHandler.HealthCheck)
 
 	taskGroup := s.router.Group("/tasks")
 	{
@@ -24,7 +27,7 @@ func (s *Server) setupRoutes() {
 		taskGroup.PUT("/:id", taskHandler.UpdateTask)
 		taskGroup.DELETE("/:id", taskHandler.DeleteTask)
 		taskGroup.GET("/", taskHandler.ListTasks)
-		//TODO: ROUTES PARA OUTROS MANIPULADORES
+		taskGroup.GET("/scheduled", taskHandler.GetScheduledTasks)
 	}
 
 	s.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

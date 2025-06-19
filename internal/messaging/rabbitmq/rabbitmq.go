@@ -2,6 +2,7 @@ package rabbitmq
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -43,7 +44,10 @@ func NewRabbitMQ(url string) (MesssageQueue, error) {
 func (r *rabbitMQ) Publish(exchange, routingKey string, message []byte) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	return r.channel.PublishWithContext(ctx, exchange, routingKey,
+	return r.channel.PublishWithContext(
+		ctx,
+		exchange,
+		routingKey,
 		false, //mandadory
 		false, //immediate
 		amqp.Publishing{
@@ -55,11 +59,27 @@ func (r *rabbitMQ) Publish(exchange, routingKey string, message []byte) error {
 }
 
 func (r *rabbitMQ) Consume(queue string) (<-chan amqp.Delivery, error) {
-	return nil, nil
+	msgs, err := r.channel.Consume(
+		queue,
+		"",    //consumer
+		false, //auto-ack
+		false, //exclusive
+		false, //no-local
+		false, //no-wait
+		nil,   //args
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to consume messages %v", err)
+	}
+
+	return msgs, nil
 }
 
 func (r *rabbitMQ) DeclareExchange(name, kind string) error {
-	return r.channel.ExchangeDeclare(name, kind,
+	return r.channel.ExchangeDeclare(
+		name,
+		kind,
 		true,  //durable
 		false, //auto-deleted
 		false, //internal
@@ -69,7 +89,8 @@ func (r *rabbitMQ) DeclareExchange(name, kind string) error {
 }
 
 func (r *rabbitMQ) DeclareQueue(name string) (amqp.Queue, error) {
-	return r.channel.QueueDeclare(name,
+	return r.channel.QueueDeclare(
+		name,
 		true,  //durable
 		false, //auto-deleted
 		false, //exclusive
@@ -79,12 +100,33 @@ func (r *rabbitMQ) DeclareQueue(name string) (amqp.Queue, error) {
 }
 
 func (r *rabbitMQ) BindQueue(queue, exchange, routingKey string) error {
-	return r.channel.QueueBind(queue, routingKey, exchange,
+	return r.channel.QueueBind(
+		queue,
+		routingKey,
+		exchange,
 		false, //no-wait
 		nil,   //args
 	)
 }
 
 func (r *rabbitMQ) CLose() error {
+	var errs []error
+
+	if r.channel != nil {
+		if err := r.channel.Close(); err != nil {
+			errs = append(errs, fmt.Errorf("failed to close channel: %v", err))
+		}
+	}
+
+	if r.conn != nil {
+		if err := r.conn.Close(); err != nil {
+			errs = append(errs, fmt.Errorf("failed to close connection: %v", err))
+		}
+	}
+
+	if len(errs) > 0 {
+		return errors.Join(errs...)
+	}
+
 	return nil
 }
