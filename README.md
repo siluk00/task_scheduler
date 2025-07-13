@@ -39,7 +39,7 @@ go build -o bin/worker cmd/worker/main.go
 
 # 4. Use CLI client
 go build -o bin/client cmd/client/main.go
-./bin/client create --name "Backup" --command "pg_dump mydb"
+./bin/client create --name "Backup" --command "sudo apt-get update && sudo apt-get upgrade -y"
 ```
 
 ## To implement next
