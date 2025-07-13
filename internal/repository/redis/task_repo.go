@@ -16,6 +16,7 @@ const (
 	taskIndex     = "tasks"
 )
 
+// Contains a pointer to a redis.Client
 type TaskRepository struct {
 	client *redis.Client
 }

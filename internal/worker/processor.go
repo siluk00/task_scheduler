@@ -11,16 +11,18 @@ import (
 	"github.com/siluk00/task_scheduler/internal/repository"
 )
 
+// Contains the interface for performing CRUD operations on Task
 type TaskProcessor struct {
-	taskRepo repository.TaskRepository
+	taskRepo repository.TaskHandler
 }
 
-func NewTaskProcessor(repo repository.TaskRepository) *TaskProcessor {
+func NewTaskProcessor(repo repository.TaskHandler) *TaskProcessor {
 	return &TaskProcessor{
 		taskRepo: repo,
 	}
 }
 
+// Processes the task, executes it, returns any errors and updates the task state
 func (p *TaskProcessor) ProcessTask(ctx context.Context, task *domain.Task) error {
 	if task.Status != domain.TaskStatusRunning {
 		task.Status = domain.TaskStatusRunning
@@ -47,6 +49,7 @@ func (p *TaskProcessor) ProcessTask(ctx context.Context, task *domain.Task) erro
 	return nil
 }
 
+// Executes the task
 func (p *TaskProcessor) executeCommand(cmdString string) (string, error) {
 	cmd := exec.Command("sh", "-c", cmdString)
 	output, err := cmd.CombinedOutput()

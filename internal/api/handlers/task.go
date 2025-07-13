@@ -16,10 +16,10 @@ import (
 )
 
 type taskHandler struct {
-	repo repository.TaskRepository
+	repo repository.TaskHandler
 }
 
-func NewTaskHandler(repo repository.TaskRepository) *taskHandler {
+func NewTaskHandler(repo repository.TaskHandler) *taskHandler {
 	return &taskHandler{
 		repo: repo,
 	}

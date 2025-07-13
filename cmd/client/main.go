@@ -20,8 +20,8 @@ func main() {
 	//Subcommands are added to the root command.
 	rootCmd.AddCommand(commands.NewCreateCommand())
 	rootCmd.AddCommand(commands.NewGetCommand())
-	//rootCmd.AddCommand(commands.NewListCommand())
-	//rootCmd.AddCommand(commands.NewUpdateCommand())
+	rootCmd.AddCommand(commands.NewListCommand())
+	rootCmd.AddCommand(commands.NewUpdateCommand())
 	//rootCmd.AddCommand(commands.NewDeleteCommand())
 	//rootCmd.AddCommand(commands.NewHealthCheckCommand())
 	//rootCmd.AddCommand(commands.NewScheduleCommand())

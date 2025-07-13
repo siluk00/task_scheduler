@@ -12,6 +12,7 @@ import (
 	"github.com/siluk00/task_scheduler/pkg/config"
 )
 
+// Creates a cancel context, starts the worker concurrently
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

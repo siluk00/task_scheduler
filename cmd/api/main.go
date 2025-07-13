@@ -10,14 +10,14 @@ import (
 func main() {
 	cfg := config.LoadConfig()
 
-	//O servidor é retornado com as rotas configuradas e pronto para ser iniciado.
+	//The server is returned with routes prepared
 	server, err := api.NewServer(cfg)
 	if err != nil {
 		log.Fatalf("Failed to create server: %v", err)
 	}
 
 	log.Printf("Starting server on port %s...", cfg.ServerPort)
-	// O método Start inicia o servidor HTTP na porta configurada.
+	// Begins the server in the port
 	if err := server.Start(); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}

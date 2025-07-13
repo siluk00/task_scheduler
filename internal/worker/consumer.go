@@ -10,6 +10,7 @@ import (
 	"github.com/siluk00/task_scheduler/internal/domain"
 )
 
+// Consumes eveything in the task_queue queue
 func (w *TaskWorker) StartConsumer(ctx context.Context) error {
 	msgs, err := w.msgQueue.Consume("task_queue")
 	if err != nil {

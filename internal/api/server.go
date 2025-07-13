@@ -14,13 +14,12 @@ import (
 type Server struct {
 	config   *config.AppConfig
 	router   *gin.Engine
-	taskRepo repository.TaskRepository
+	taskRepo repository.TaskHandler
 	//Adicionar serviços/repositorios aqui
 }
 
-// O gin.Engine é o roteador principal do Gin, que gerencia as rotas e os manipuladores de requisições.
-// também é possível adicionar middlewares, grupos de rotas e outras funcionalidades do Gin.
-// e configurações do servidor HTTP (como modo de execução, tratamento de erros, etc )
+// Creates the server client and tests it, creates the redis repository
+// Creates the server and setup the routes
 func NewServer(cfg *config.AppConfig) (*Server, error) {
 	//New Client with Options like Address, Password, DB
 	// O redis.NewClient cria um novo cliente Redis com as opções fornecidas.
@@ -39,7 +38,6 @@ func NewServer(cfg *config.AppConfig) (*Server, error) {
 
 	taskRepo := redis.NewTaskRepository(rdb)
 
-	// Gin Server logic
 	server := &Server{
 		config:   cfg,
 		router:   gin.Default(),
@@ -50,7 +48,7 @@ func NewServer(cfg *config.AppConfig) (*Server, error) {
 	return server, nil
 }
 
-// O método Start inicia o servidor HTTP na porta configurada.
+// Runs the server
 func (s *Server) Start() error {
 	return s.router.Run(":" + s.config.ServerPort)
 }

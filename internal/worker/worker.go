@@ -15,14 +15,18 @@ import (
 	"github.com/siluk00/task_scheduler/pkg/config"
 )
 
+// Contains utils like configuration, a pointer to redis client,
+// the repository of tasks, the message queue and a bool to test if the worker is running
 type TaskWorker struct {
 	config      *config.AppConfig
 	redisClient *redis.Client
-	taskRepo    repository.TaskRepository //CRUD interface of the server
+	taskRepo    repository.TaskHandler //CRUD interface of the server
 	msgQueue    rabbitmq.MesssageQueue
 	running     bool
 }
 
+// Creates a task Worker without running the worker yet, create the redis client and tests it
+// the creates the message broker and a new repository for the cache
 func NewTaskWorker(cfg *config.AppConfig) (*TaskWorker, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     cfg.RedisAddress,
@@ -81,6 +85,8 @@ func (w *TaskWorker) Start(ctx context.Context) error {
 	return nil
 }
 
+// Creates a direct exchange "tasks" and  a queue "task_queue" and binds them
+// with the routing key "tasks.routing.key"
 func (w *TaskWorker) SetupRabbitMQ() error {
 	// declare two exchanges, tasks and direct
 	err := w.msgQueue.DeclareExchange("tasks", "direct")
@@ -97,6 +103,9 @@ func (w *TaskWorker) SetupRabbitMQ() error {
 	return w.msgQueue.BindQueue("tasks_queue", "tasks", "tasks.routing.key")
 }
 
+// Processes the tasks in the windows frame from now to 5 minutes
+// then publishes the pending task for execution.
+// It waits for 30 seconds before finishing.
 func (w *TaskWorker) proccessTasks(ctx context.Context) error {
 	now := time.Now()
 	windowEnd := now.Add(5 * time.Minute)
@@ -131,6 +140,7 @@ func (w *TaskWorker) proccessTasks(ctx context.Context) error {
 	return nil
 }
 
+// Publishes the task in the tasks exchange wuth task.routing.key as the routing key
 func (w *TaskWorker) publishTask(task *domain.Task) error {
 	taskData, err := json.Marshal(task)
 	if err != nil {
@@ -140,6 +150,7 @@ func (w *TaskWorker) publishTask(task *domain.Task) error {
 	return w.msgQueue.Publish("tasks", "task.routing.key", taskData)
 }
 
+// Stops the worker
 func (w *TaskWorker) Stop(ctx context.Context) {
 	w.running = false
 	if err := w.msgQueue.CLose(); err != nil {
