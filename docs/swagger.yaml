@@ -37,6 +37,63 @@ info:
   title: Task Scheduler API
   version: "1.0"
 paths:
+  /tasks:
+    get:
+      description: Lists tasks, it can be filtered by status
+      parameters:
+      - description: Status for filering (pending, running, completed, failed)
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Task'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Lists tasks
+      tags:
+      - tasks
+    post:
+      description: Creates a new task in the system
+      parameters:
+      - description: taskData
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Task'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Task'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Creates a new Task
+      tags:
+      - tasks
   /tasks/{id}:
     delete:
       description: Delete a task by its id
@@ -64,6 +121,74 @@ paths:
               type: string
             type: object
       summary: Delete a task
+      tags:
+      - tasks
+    get:
+      description: gets a task by its ID
+      parameters:
+      - description: taskId
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Task'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Gets a Task
+      tags:
+      - tasks
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing task
+      parameters:
+      - description: task id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Task'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Updates a task
       tags:
       - tasks
   /tasks/scheduled:
@@ -103,5 +228,5 @@ paths:
             type: object
       summary: List Scheduled Tasks
       tags:
-      - taks
+      - tasks
 swagger: "2.0"
