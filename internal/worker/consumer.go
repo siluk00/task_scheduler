@@ -12,7 +12,7 @@ import (
 
 // Consumes eveything in the task_queue queue
 func (w *TaskWorker) StartConsumer(ctx context.Context) error {
-	msgs, err := w.msgQueue.Consume("task_queue")
+	msgs, err := w.msgQueue.Consume("tasks_queue")
 	if err != nil {
 		return fmt.Errorf("failed to start consumer: %v", err)
 	}

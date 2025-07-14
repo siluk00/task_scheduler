@@ -1,3 +1,4 @@
 bin
 .vscode
 test_data
+config.yaml

@@ -28,6 +28,7 @@ func (s *Server) setupRoutes() {
 		taskGroup.DELETE("/:id", taskHandler.DeleteTask)
 		taskGroup.GET("/", taskHandler.ListTasks)
 		taskGroup.GET("/scheduled", taskHandler.GetScheduledTasks)
+		taskGroup.PUT("/tasks/:id/execute", taskHandler.ExecuteTask)
 	}
 
 	s.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

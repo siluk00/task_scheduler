@@ -22,9 +22,10 @@ func main() {
 	rootCmd.AddCommand(commands.NewGetCommand())
 	rootCmd.AddCommand(commands.NewListCommand())
 	rootCmd.AddCommand(commands.NewUpdateCommand())
-	//rootCmd.AddCommand(commands.NewDeleteCommand())
+	rootCmd.AddCommand(commands.NewDeleteCommand())
 	//rootCmd.AddCommand(commands.NewHealthCheckCommand())
-	//rootCmd.AddCommand(commands.NewScheduleCommand())
+	rootCmd.AddCommand(commands.NewScheduleCommand())
+	rootCmd.AddCommand(commands.NewExecuteCommand())
 
 	if err := rootCmd.Execute(); err != nil {
 		log.Println(err)

@@ -48,3 +48,5 @@ go build -o bin/client cmd/client/main.go
 - Linear Algebra Tasks 
 - Gob faster encoding/decoding
 - Two more workers to distribute tasks 
+- Use viper for environment variables
+- Implement flags for task repetions "daily", "hourly", ...
