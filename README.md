@@ -1,4 +1,4 @@
-# Task Scheduler
+# Karma Task Scheduler
 
 Scalable task scheduling system using Go, Redis, and RabbitMQ.
 
