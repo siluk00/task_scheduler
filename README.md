@@ -2,6 +2,9 @@
 
 Scalable task scheduling system using Go, Redis, and RabbitMQ.
 
+## Motivation
+I wanted to do myself an application that could use lots of backend concepts in just one software, the best option i found was the task-scheduler since i can use message broker, cache, database knowledge and containers
+
 ## Key Features
 - 🕒 Custom command scheduling
 - 📈 Distributed asynchronous execution
@@ -15,7 +18,7 @@ Scalable task scheduling system using Go, Redis, and RabbitMQ.
 - **Queues**: RabbitMQ
 - **Orchestration**: Docker/Kubernetes
 
-## How to Run
+## Quick Start
 
 ### Prerequisites
 - Docker and Docker Compose
@@ -42,6 +45,8 @@ go build -o bin/client cmd/client/main.go
 ./bin/client create --name "Backup" --command "sudo apt-get update && sudo apt-get upgrade -y"
 ```
 
+## Usage
+
 ## To implement next
 - PostgreSQL for persistence
 - Architecture Design
@@ -50,3 +55,5 @@ go build -o bin/client cmd/client/main.go
 - Two more workers to distribute tasks 
 - Use viper for environment variables
 - Implement flags for task repetions "daily", "hourly", ...
+
+## Contributing
